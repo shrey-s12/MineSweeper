@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectGrid, revealCell, placeFlag, selectGameStatus } from '../slices/gameSlice';
+import { selectGrid, revealCell, placeFlag, updateTime, selectGameStatus } from '../slices/gameSlice';
 import Cells from './Cells';
 
 const Board = () => {
     const grid = useSelector(selectGrid);
     const gameStatus = useSelector(selectGameStatus);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (gameStatus === "Playing") {
+            const timer = setInterval(() => {
+                dispatch(updateTime());
+            }, 1000);
+
+            return () => clearInterval(timer);
+        }
+    }, [gameStatus]);
 
     const handleCellClick = (rowIndex, colIndex) => {
         if (gameStatus === "lost" || gameStatus === "won") return;
