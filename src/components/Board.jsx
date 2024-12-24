@@ -20,24 +20,26 @@ const Board = () => {
     };
 
     return (
-        <div className="grid gap-1 bg-gray-900 mt-2 p-6 rounded-lg shadow-md"
-            style={{ gridTemplateColumns: `repeat(${grid[0].length}, 3rem)` }}>
+        <div className="bg-gray-900 mt-2 p-6 rounded-lg">
+            <div className="grid gap-1 justify-center"
+                style={{ gridTemplateColumns: `repeat(${grid[0].length}, 3rem)` }}>
 
-            {grid.map((row, rowIndex) =>
-                row.map((cell, colIndex) => (
-                    <Cells
-                        key={`${rowIndex}-${colIndex}`}
-                        revealed={cell.revealed}
-                        hasMine={cell.hasMine}
-                        flagged={cell.flagged}
-                        adjacentMines={cell.adjacentMines}
-                        rowIndex={rowIndex}
-                        colIndex={colIndex}
-                        onClick={handleCellClick}
-                        onContextMenu={handleFlagClick}
-                    />
-                ))
-            )}
+                {grid.map((row, rowIndex) =>
+                    row.map((cell, colIndex) => (
+                        <Cells
+                            key={`${rowIndex}-${colIndex}`}
+                            revealed={cell.revealed}
+                            hasMine={cell.hasMine}
+                            flagged={cell.flagged}
+                            adjacentMines={cell.adjacentMines}
+                            rowIndex={rowIndex}
+                            colIndex={colIndex}
+                            onClick={handleCellClick}
+                            onContextMenu={handleFlagClick}
+                        />
+                    ))
+                )}
+            </div>
         </div>
     );
 };
