@@ -77,7 +77,7 @@ const gameSlice = createSlice({
 
                 // flat() -> Flattens the 2D array (state.grid) into a 1D array.
                 const revealedCells = state.grid.flat().filter(c => c.revealed).length;
-                const totalMines = state.mines;
+                const totalMines = 3;
 
                 if (revealedCells === totalCells - totalMines) {
                     state.gameStatus = "won";

@@ -1,6 +1,7 @@
 import React from 'react';
 
 const Cells = ({ revealed, hasMine, flagged, adjacentMines, onClick, onContextMenu, rowIndex, colIndex }) => {
+
     return (
         <button
             onClick={() => onClick(rowIndex, colIndex)}
