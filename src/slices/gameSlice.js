@@ -3,39 +3,39 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     grid: [
         [
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 0 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 0 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 0 },
+            { revealed: false, hasMine: false, adjacentMines: 0 },
         ],
         [
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
-            { revealed: false, hasMine: true, flagged: false, adjacentMines: 0 }, // 💣
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 2 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 0 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
+            { revealed: false, hasMine: true, adjacentMines: 0 }, // 💣
+            { revealed: false, hasMine: false, adjacentMines: 2 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 0 },
         ],
         [
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 2 },
-            { revealed: false, hasMine: true, flagged: false, adjacentMines: 0 }, // 💣
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 2 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 2 },
+            { revealed: false, hasMine: true, adjacentMines: 0 }, // 💣
+            { revealed: false, hasMine: false, adjacentMines: 2 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
         ],
         [
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 0 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 2 },
-            { revealed: false, hasMine: true, flagged: false, adjacentMines: 0 }, // 💣
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 0 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 2 },
+            { revealed: false, hasMine: true, adjacentMines: 0 }, // 💣
+            { revealed: false, hasMine: false, adjacentMines: 1 },
         ],
         [
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 0 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 0 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, flagged: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 0 },
+            { revealed: false, hasMine: false, adjacentMines: 0 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
+            { revealed: false, hasMine: false, adjacentMines: 1 },
         ],
     ],
     gameStatus: "idle",
