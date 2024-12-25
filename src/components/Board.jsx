@@ -19,13 +19,11 @@ const Board = () => {
     }, [gameStatus]);
 
     const handleCellClick = (rowIndex, colIndex) => {
-        if (gameStatus === "lost" || gameStatus === "won") return;
         dispatch(revealCell({ rowIndex, colIndex }));
     };
 
     let handleFlagClick = (e, rowIndex, colIndex) => {
         e.preventDefault();
-        if (gameStatus === "lost" || gameStatus === "won") return;
         dispatch(placeFlag({ rowIndex, colIndex }));
     };
 
@@ -38,9 +36,8 @@ const Board = () => {
                     row.map((cell, colIndex) => (
                         <Cells
                             key={`${rowIndex}-${colIndex}`}
-                            revealed={cell.revealed}
+                            cellState={cell.cellState}
                             hasMine={cell.hasMine}
-                            flagged={cell.flagged}
                             adjacentMines={cell.adjacentMines}
                             rowIndex={rowIndex}
                             colIndex={colIndex}
