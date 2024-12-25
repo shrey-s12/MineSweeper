@@ -1,4 +1,5 @@
 import GamePage from './pages/GamePage';
+import TrafficLight from './pages/TrafficLight';
 
 function App() {
   return (
@@ -9,6 +10,9 @@ function App() {
       <div className="bg-gray-600 shadow-lg rounded-xl p-6 w-full max-w-xl">
         <GamePage />
       </div>
+
+      {/* <TrafficLight /> */}
+
     </div>
   );
 }

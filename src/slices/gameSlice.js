@@ -1,45 +1,54 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-    grid: [
-        [
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, adjacentMines: 0 },
-            { revealed: false, hasMine: false, adjacentMines: 0 },
-        ],
-        [
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-            { revealed: false, hasMine: true, adjacentMines: 0 }, // 💣
-            { revealed: false, hasMine: false, adjacentMines: 2 },
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, adjacentMines: 0 },
-        ],
-        [
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, adjacentMines: 2 },
-            { revealed: false, hasMine: true, adjacentMines: 0 }, // 💣
-            { revealed: false, hasMine: false, adjacentMines: 2 },
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-        ],
-        [
-            { revealed: false, hasMine: false, adjacentMines: 0 },
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, adjacentMines: 2 },
-            { revealed: false, hasMine: true, adjacentMines: 0 }, // 💣
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-        ],
-        [
-            { revealed: false, hasMine: false, adjacentMines: 0 },
-            { revealed: false, hasMine: false, adjacentMines: 0 },
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-            { revealed: false, hasMine: false, adjacentMines: 1 },
-        ],
+const grid = [
+    [
+        { cellState: "closed", hasMine: false }, // cellSate: "open", "closed", "flagged"
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
     ],
-    gameStatus: "idle",
-    mines: 3,
+    [
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: true }, // 💣
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+    ],
+    [
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: true }, // 💣
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+    ],
+    [
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: true }, // 💣
+        { cellState: "closed", hasMine: false },
+    ],
+    [
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+        { cellState: "closed", hasMine: false },
+    ],
+]
+const mines = grid.flat().filter(c => c.hasMine).length;
+
+const directions = [
+    [-1, -1], [-1, 0], [-1, 1],
+    [0, -1], [0, 1],
+    [1, -1], [1, 0], [1, 1],
+];
+
+const initialState = {
+    grid,
+    gameStatus: "idle", // idle, Playing, lost, won
+    mines,
     timer: 0,
 }
 
@@ -48,54 +57,103 @@ const gameSlice = createSlice({
     initialState,
     reducers: {
         revealCell: (state, action) => {
+            if (state.gameStatus === "lost" || state.gameStatus === "won") return;
+
             const { rowIndex, colIndex } = action.payload;
             const cell = state.grid[rowIndex][colIndex];
-            state.gameStatus = "Playing";
 
-            // If the cell is already revealed or flagged, do nothing
-            if (cell.revealed || cell.flagged) {
-                return;
+            // Start the game if not already in progress
+            if (state.gameStatus === "idle") {
+                state.gameStatus = "Playing";
             }
 
-            // Reveal the cell
-            cell.revealed = true;
+            // If the cell is already open or flagged, do nothing
+            if (cell.cellState === "open" || cell.cellState === "flagged") return;
+
+            // Helper function to count adjacent mines
+            const countAdjacentMines = (row, col) => {
+
+                return directions.reduce((count, [dx, dy]) => {
+                    const newRow = row + dx;
+                    const newCol = col + dy;
+                    if (
+                        newRow >= 0 && newRow < state.grid.length &&
+                        newCol >= 0 && newCol < state.grid[0].length &&
+                        state.grid[newRow][newCol].hasMine
+                    ) {
+                        return count + 1;
+                    }
+                    return count;
+                }, 0);
+            };
+
+            // Helper function for recursive revealing
+            const revealNeighbors = (row, col) => {
+
+                directions.forEach(([dx, dy]) => {
+                    const newRow = row + dx;
+                    const newCol = col + dy;
+                    if (
+                        newRow >= 0 && newRow < state.grid.length &&
+                        newCol >= 0 && newCol < state.grid[0].length
+                    ) {
+                        const neighbor = state.grid[newRow][newCol];
+                        if (neighbor.cellState === "closed") {
+                            neighbor.cellState = "open";
+                            const mines = countAdjacentMines(newRow, newCol);
+                            neighbor.adjacentMines = mines;
+
+                            if (mines === 0) {
+                                revealNeighbors(newRow, newCol); // Recursive reveal
+                            }
+                        }
+                    }
+                });
+            };
+
+            // Reveal the current cell
+            cell.cellState = "open";
+            const adjacentMines = countAdjacentMines(rowIndex, colIndex);
+            cell.adjacentMines = adjacentMines;
 
             // If the cell has a mine, the game is lost
             if (cell.hasMine) {
                 state.gameStatus = "lost";
 
-                state.grid.forEach(row => {
+                // Reveal all mines
+                state.grid.forEach(row =>
                     row.forEach(cell => {
                         if (cell.hasMine) {
-                            cell.revealed = true;
+                            cell.cellState = "open";
                         }
                     })
-                });
-            } else {
-                // Check if the user has revealed all non-mined cells
-                const totalCells = state.grid.length * state.grid[0].length;
+                );
+            } else if (adjacentMines === 0) {
+                // Reveal neighboring cells if no adjacent mines
+                revealNeighbors(rowIndex, colIndex);
+            }
 
-                // flat() -> Flattens the 2D array (state.grid) into a 1D array.
-                const revealedCells = state.grid.flat().filter(c => c.revealed).length;
-                const totalMines = 3;
+            // Check if all non-mined cells are revealed
+            const totalCells = state.grid.length * state.grid[0].length;
+            const revealedCells = state.grid.flat().filter(c => c.cellState === "open").length;
+            const totalMines = mines;
 
-                if (revealedCells === totalCells - totalMines) {
-                    state.gameStatus = "won";
-                }
+            if (revealedCells === totalCells - totalMines) {
+                state.gameStatus = "won";
             }
         },
         placeFlag: (state, action) => {
+            if (state.gameStatus === "lost" || state.gameStatus === "won") return;
             const { rowIndex, colIndex } = action.payload;
+            const cell = state.grid[rowIndex][colIndex];
             state.gameStatus = "Playing";
 
-            // If the cell is already revealed, do nothing
-            if (state.grid[rowIndex][colIndex].revealed) {
-                return;
-            }
+            // If the cell is already open, do nothing
+            if (cell.cellState === "open") return;
 
             // Toggle the flagged property and update the minesLeft count
-            state.grid[rowIndex][colIndex].flagged = !state.grid[rowIndex][colIndex].flagged;
-            state.mines += state.grid[rowIndex][colIndex].flagged ? -1 : 1;
+            cell.cellState = cell.cellState === "flagged" ? "closed" : "flagged";
+            cell.cellState === "flagged" ? state.mines -= 1 : state.mines += 1;
         },
         updateTime: (state) => {
             state.timer += 1;
@@ -103,13 +161,12 @@ const gameSlice = createSlice({
         resetGame: (state) => {
             state.grid.forEach(row =>
                 row.forEach(cell => {
-                    cell.revealed = false;
-                    cell.flagged = false;
+                    cell.cellState = "closed";
                 })
             );
             state.gameStatus = "idle";
             state.timer = 0;
-            state.mines = 3;
+            state.mines = mines;
         },
     }
 });
