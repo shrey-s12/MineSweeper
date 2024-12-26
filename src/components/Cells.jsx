@@ -5,7 +5,7 @@ const Cells = ({ cellState, hasMine, adjacentMines, onClick, onContextMenu, rowI
         <button
             onClick={() => onClick(rowIndex, colIndex)}
             onContextMenu={(e) => onContextMenu(e, rowIndex, colIndex)}
-            className={`w-12 h-12 flex items-center justify-center border-2 rounded-md font-bold text-lg 
+            className={`w-10 h-10 flex items-center justify-center border-2 rounded-md font-bold text-lg 
             ${cellState === "open"
                     ? hasMine
                         ? "bg-red-600 text-white border-red-800 shadow-lg" // Cell with mine

@@ -6,7 +6,7 @@ function App() {
       <h1 className="text-5xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600 drop-shadow-lg">
         Minesweeper
       </h1>
-      <div className="bg-gray-600 shadow-lg rounded-xl p-6 w-full max-w-xl">
+      <div className="bg-gray-600 shadow-lg rounded-xl p-6">
         <GamePage />
       </div>
     </div>

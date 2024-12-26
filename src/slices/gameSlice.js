@@ -1,43 +1,74 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const grid = [
-    [
-        { cellState: "closed", hasMine: false }, // cellSate: "open", "closed", "flagged"
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-    ],
-    [
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: true }, // 💣
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-    ],
-    [
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: true }, // 💣
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-    ],
-    [
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: true }, // 💣
-        { cellState: "closed", hasMine: false },
-    ],
-    [
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-        { cellState: "closed", hasMine: false },
-    ],
-]
-const mines = grid.flat().filter(c => c.hasMine).length;
+const generateGrid = (rows, cols, totalMines) => {
+    // Create an empty grid
+    const grid = Array.from({ length: rows }, () =>
+        Array.from({ length: cols }, () => ({
+            cellState: "closed",
+            hasMine: false,
+        }))
+    );
+
+    // Randomly place mines
+    let minesPlaced = 0;
+    while (minesPlaced < totalMines) {
+        const row = Math.floor(Math.random() * rows);
+        const col = Math.floor(Math.random() * cols);
+        if (!grid[row][col].hasMine) {
+            grid[row][col].hasMine = true;
+            minesPlaced++;
+        }
+    }
+
+    return grid;
+};
+
+const initialState = {
+    grid: generateGrid(9, 9, 10), // Default to Easy difficulty
+    gameStatus: "idle", // idle, Playing, lost, won
+    mines: 10,
+    timer: 0,
+    difficulty: "easy", // easy, medium, hard
+};
+
+// const grid = [
+//     [
+//         { cellState: "closed", hasMine: false }, // cellSate: "open", "closed", "flagged"
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//     ],
+//     [
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: true }, // 💣
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//     ],
+//     [
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: true }, // 💣
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//     ],
+//     [
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: true }, // 💣
+//         { cellState: "closed", hasMine: false },
+//     ],
+//     [
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//         { cellState: "closed", hasMine: false },
+//     ],
+// ]
+const mines = initialState.grid.flat().filter(c => c.hasMine).length;
 
 const directions = [
     [-1, -1], [-1, 0], [-1, 1],
@@ -45,17 +76,52 @@ const directions = [
     [1, -1], [1, 0], [1, 1],
 ];
 
-const initialState = {
-    grid,
-    gameStatus: "idle", // idle, Playing, lost, won
-    mines,
-    timer: 0,
-}
-
 const gameSlice = createSlice({
     name: "gameNameInSlice",
     initialState,
     reducers: {
+        setDifficulty: (state, action) => {
+            state.difficulty = action.payload;
+            switch (action.payload) {
+                case "easy":
+                    state.grid = generateGrid(9, 9, 10);
+                    state.mines = 10;
+                    break;
+                case "medium":
+                    state.grid = generateGrid(16, 16, 40);
+                    state.mines = 40;
+                    break;
+                case "hard":
+                    state.grid = generateGrid(25, 25, 99);
+                    state.mines = 99;
+                    break;
+                default:
+                    break;
+            }
+            state.gameStatus = "idle";
+            state.timer = 0;
+        },
+        resetGame: (state) => {
+            const { difficulty } = state;
+            switch (difficulty) {
+                case "easy":
+                    state.grid = generateGrid(9, 9, 10);
+                    state.mines = 10;
+                    break;
+                case "medium":
+                    state.grid = generateGrid(16, 16, 40);
+                    state.mines = 40;
+                    break;
+                case "hard":
+                    state.grid = generateGrid(25, 25, 99);
+                    state.mines = 99;
+                    break;
+                default:
+                    break;
+            }
+            state.gameStatus = "idle";
+            state.timer = 0;
+        },
         revealCell: (state, action) => {
             if (state.gameStatus === "lost" || state.gameStatus === "won") return;
 
@@ -158,23 +224,13 @@ const gameSlice = createSlice({
         updateTime: (state) => {
             state.timer += 1;
         },
-        resetGame: (state) => {
-            state.grid.forEach(row =>
-                row.forEach(cell => {
-                    cell.cellState = "closed";
-                })
-            );
-            state.gameStatus = "idle";
-            state.timer = 0;
-            state.mines = mines;
-        },
     }
 });
 
-export const { initializeGame, revealCell, placeFlag, updateTime, resetGame } = gameSlice.actions;
+export const { setDifficulty, resetGame, revealCell, placeFlag, updateTime } = gameSlice.actions;
 export default gameSlice.reducer;
 
-export const selectGame = state => state.gameKeyInStore;
+export const selectDifficulty = (state) => state.gameKeyInStore.difficulty;
 export const selectGrid = state => state.gameKeyInStore.grid;
 export const selectGameStatus = state => state.gameKeyInStore.gameStatus;
 export const selectMines = state => state.gameKeyInStore.mines;
