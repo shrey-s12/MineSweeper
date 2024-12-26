@@ -30,45 +30,28 @@ const initialState = {
     timer: 0,
     difficulty: "easy", // easy, medium, hard
 };
-
-// const grid = [
-//     [
-//         { cellState: "closed", hasMine: false }, // cellSate: "open", "closed", "flagged"
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//     ],
-//     [
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: true }, // 💣
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//     ],
-//     [
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: true }, // 💣
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//     ],
-//     [
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: true }, // 💣
-//         { cellState: "closed", hasMine: false },
-//     ],
-//     [
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//         { cellState: "closed", hasMine: false },
-//     ],
-// ]
 const mines = initialState.grid.flat().filter(c => c.hasMine).length;
+
+const setDifficultyProperties = (state, difficulty) => {
+    switch (difficulty) {
+        case "easy":
+            state.grid = generateGrid(9, 9, 10);
+            state.mines = 10;
+            break;
+        case "medium":
+            state.grid = generateGrid(16, 16, 40);
+            state.mines = 40;
+            break;
+        case "hard":
+            state.grid = generateGrid(25, 25, 99);
+            state.mines = 99;
+            break;
+        default:
+            break;
+    }
+    state.gameStatus = "idle";
+    state.timer = 0;
+};
 
 const directions = [
     [-1, -1], [-1, 0], [-1, 1],
@@ -82,45 +65,10 @@ const gameSlice = createSlice({
     reducers: {
         setDifficulty: (state, action) => {
             state.difficulty = action.payload;
-            switch (action.payload) {
-                case "easy":
-                    state.grid = generateGrid(9, 9, 10);
-                    state.mines = 10;
-                    break;
-                case "medium":
-                    state.grid = generateGrid(16, 16, 40);
-                    state.mines = 40;
-                    break;
-                case "hard":
-                    state.grid = generateGrid(25, 25, 99);
-                    state.mines = 99;
-                    break;
-                default:
-                    break;
-            }
-            state.gameStatus = "idle";
-            state.timer = 0;
+            setDifficultyProperties(state, action.payload);
         },
         resetGame: (state) => {
-            const { difficulty } = state;
-            switch (difficulty) {
-                case "easy":
-                    state.grid = generateGrid(9, 9, 10);
-                    state.mines = 10;
-                    break;
-                case "medium":
-                    state.grid = generateGrid(16, 16, 40);
-                    state.mines = 40;
-                    break;
-                case "hard":
-                    state.grid = generateGrid(25, 25, 99);
-                    state.mines = 99;
-                    break;
-                default:
-                    break;
-            }
-            state.gameStatus = "idle";
-            state.timer = 0;
+            setDifficultyProperties(state, state.difficulty);
         },
         revealCell: (state, action) => {
             if (state.gameStatus === "lost" || state.gameStatus === "won") return;
