@@ -1,11 +1,11 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { selectGameStatus, selectTimer, resetGame, selectMines } from '../slices/gameSlice'
+import { selectGameStatus, selectTimer, selectMines, setDifficulty } from '../slices/gameSlice'
 
 const Status = () => {
     const status = useSelector(selectGameStatus);
     return (
-        <div className="text-lg">
+        <div className="text-lg border-r-2 pr-4">
             Status: <span className={`font-bold ${status === "lost" ? "text-red-600" : "text-green-600"}`}>
                 {status === "won" ? "You Won 🎉" : status}
             </span>
@@ -13,38 +13,50 @@ const Status = () => {
     )
 }
 
-const Reset = () => {
-    const dispatch = useDispatch(resetGame);
-
-    const handleReset = () => {
-        dispatch(resetGame());
-    }
+const Timer = () => {
+    const timer = useSelector(selectTimer);
     return (
-        <button
-            onClick={handleReset}
-            className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-6 rounded-lg shadow-lg hover:scale-105 transform transition-transform duration-300">
-            Reset
-        </button>
+        <div className="text-lg border-r-2 pr-4">
+            Timer: <span className="font-mono text-yellow-400">{timer}s</span>
+        </div>
+    )
+}
 
+const MinesLeft = () => {
+    const mines = useSelector(selectMines);
+    return (
+        <div className="text-lg border-r-2 pr-4">
+            Mines Left: <span className="font-mono text-red-400">{mines}</span>
+        </div>
+    )
+}
+
+const Levels = () => {
+    const dispatch = useDispatch();
+    const handleDifficultyChange = (e) => {
+        const difficulty = e.target.value;
+        dispatch(setDifficulty(difficulty));
+    };
+    return (
+        <select
+            onChange={handleDifficultyChange}
+            defaultValue="easy"
+            className="bg-gray-700 text-white py-2 px-4 rounded-md">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
     )
 }
 
 const Header = () => {
-    const mines = useSelector(selectMines);
-    const timer = useSelector(selectTimer);
-
     return (
-        <div className="bg-gray-800 text-white p-4 rounded-lg shadow-md flex justify-between items-center">
+        <div className="bg-gray-800 text-white p-3 rounded-lg shadow-md flex justify-between items-center space-x-4">
             <Status />
-            <div className="text-lg">
-                Timer: <span className="font-mono text-yellow-400">{timer}s</span>
-            </div>
-            <div className="text-lg">
-                Mines Left: <span className="font-mono text-red-400">{mines}</span>
-            </div>
-            <Reset />
+            <Timer />
+            <MinesLeft />
+            <Levels />
         </div>
-
     )
 }
 
