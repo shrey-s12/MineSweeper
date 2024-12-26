@@ -47,7 +47,7 @@ const setDifficultyProperties = (state, difficulty) => {
 };
 
 // Helper function to count adjacent mines
-const countAdjacentMines = (row, col) => {
+const countAdjacentMines = (state, row, col) => {
 
     return directions.reduce((count, [dx, dy]) => {
         const newRow = row + dx;
@@ -64,7 +64,7 @@ const countAdjacentMines = (row, col) => {
 };
 
 // Helper function for recursive revealing
-const revealNeighbors = (row, col) => {
+const revealNeighbors = (state, row, col) => {
 
     directions.forEach(([dx, dy]) => {
         const newRow = row + dx;
@@ -76,11 +76,11 @@ const revealNeighbors = (row, col) => {
             const neighbor = state.grid[newRow][newCol];
             if (neighbor.cellState === "closed") {
                 neighbor.cellState = "open";
-                const mines = countAdjacentMines(newRow, newCol);
+                const mines = countAdjacentMines(state, newRow, newCol);
                 neighbor.adjacentMines = mines;
 
                 if (mines === 0) {
-                    revealNeighbors(newRow, newCol); // Recursive reveal
+                    revealNeighbors(state, newRow, newCol); // Recursive reveal
                 }
             }
         }
@@ -129,7 +129,7 @@ const gameSlice = createSlice({
 
             // Reveal the current cell
             cell.cellState = "open";
-            const adjacentMines = countAdjacentMines(rowIndex, colIndex);
+            const adjacentMines = countAdjacentMines(state, rowIndex, colIndex);
             cell.adjacentMines = adjacentMines;
 
             // If the cell has a mine, the game is lost and reveal all mines and if no adjacent mines, reveal neighbors
@@ -146,7 +146,7 @@ const gameSlice = createSlice({
                 );
             } else if (adjacentMines === 0) {
                 // Reveal neighboring cells if no adjacent mines
-                revealNeighbors(rowIndex, colIndex);
+                revealNeighbors(state, rowIndex, colIndex);
             }
 
             // Check if all non-mined cells are revealed
