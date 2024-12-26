@@ -94,7 +94,6 @@ const initialState = {
     timer: 0,
     difficulty: "easy", // easy, medium, hard
 };
-const mines = initialState.grid.flat().filter(c => c.hasMine).length;
 
 const directions = [
     [-1, -1], [-1, 0], [-1, 1],
@@ -152,7 +151,7 @@ const gameSlice = createSlice({
             // Check if all non-mined cells are revealed
             const totalCells = state.grid.length * state.grid[0].length;
             const revealedCells = state.grid.flat().filter(c => c.cellState === "open").length;
-            const totalMines = mines;
+            const totalMines = state.grid.flat().filter(c => c.hasMine).length;
 
             if (revealedCells === totalCells - totalMines) {
                 state.gameStatus = "won";
