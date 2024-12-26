@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+// Helper function to generate a grid with mines
 const generateGrid = (rows, cols, totalMines) => {
     // Create an empty grid
     const grid = Array.from({ length: rows }, () =>
@@ -23,15 +24,7 @@ const generateGrid = (rows, cols, totalMines) => {
     return grid;
 };
 
-const initialState = {
-    grid: generateGrid(9, 9, 10), // Default to Easy difficulty
-    gameStatus: "idle", // idle, Playing, lost, won
-    mines: 10,
-    timer: 0,
-    difficulty: "easy", // easy, medium, hard
-};
-const mines = initialState.grid.flat().filter(c => c.hasMine).length;
-
+// Helper function to set the grid and mines based on difficulty
 const setDifficultyProperties = (state, difficulty) => {
     switch (difficulty) {
         case "easy":
@@ -52,6 +45,56 @@ const setDifficultyProperties = (state, difficulty) => {
     state.gameStatus = "idle";
     state.timer = 0;
 };
+
+// Helper function to count adjacent mines
+const countAdjacentMines = (row, col) => {
+
+    return directions.reduce((count, [dx, dy]) => {
+        const newRow = row + dx;
+        const newCol = col + dy;
+        if (
+            newRow >= 0 && newRow < state.grid.length &&
+            newCol >= 0 && newCol < state.grid[0].length &&
+            state.grid[newRow][newCol].hasMine
+        ) {
+            return count + 1;
+        }
+        return count;
+    }, 0);
+};
+
+// Helper function for recursive revealing
+const revealNeighbors = (row, col) => {
+
+    directions.forEach(([dx, dy]) => {
+        const newRow = row + dx;
+        const newCol = col + dy;
+        if (
+            newRow >= 0 && newRow < state.grid.length &&
+            newCol >= 0 && newCol < state.grid[0].length
+        ) {
+            const neighbor = state.grid[newRow][newCol];
+            if (neighbor.cellState === "closed") {
+                neighbor.cellState = "open";
+                const mines = countAdjacentMines(newRow, newCol);
+                neighbor.adjacentMines = mines;
+
+                if (mines === 0) {
+                    revealNeighbors(newRow, newCol); // Recursive reveal
+                }
+            }
+        }
+    });
+};
+
+const initialState = {
+    grid: generateGrid(9, 9, 10), // Default to Easy difficulty
+    gameStatus: "idle", // idle, Playing, lost, won
+    mines: 10,
+    timer: 0,
+    difficulty: "easy", // easy, medium, hard
+};
+const mines = initialState.grid.flat().filter(c => c.hasMine).length;
 
 const directions = [
     [-1, -1], [-1, 0], [-1, 1],
@@ -84,53 +127,12 @@ const gameSlice = createSlice({
             // If the cell is already open or flagged, do nothing
             if (cell.cellState === "open" || cell.cellState === "flagged") return;
 
-            // Helper function to count adjacent mines
-            const countAdjacentMines = (row, col) => {
-
-                return directions.reduce((count, [dx, dy]) => {
-                    const newRow = row + dx;
-                    const newCol = col + dy;
-                    if (
-                        newRow >= 0 && newRow < state.grid.length &&
-                        newCol >= 0 && newCol < state.grid[0].length &&
-                        state.grid[newRow][newCol].hasMine
-                    ) {
-                        return count + 1;
-                    }
-                    return count;
-                }, 0);
-            };
-
-            // Helper function for recursive revealing
-            const revealNeighbors = (row, col) => {
-
-                directions.forEach(([dx, dy]) => {
-                    const newRow = row + dx;
-                    const newCol = col + dy;
-                    if (
-                        newRow >= 0 && newRow < state.grid.length &&
-                        newCol >= 0 && newCol < state.grid[0].length
-                    ) {
-                        const neighbor = state.grid[newRow][newCol];
-                        if (neighbor.cellState === "closed") {
-                            neighbor.cellState = "open";
-                            const mines = countAdjacentMines(newRow, newCol);
-                            neighbor.adjacentMines = mines;
-
-                            if (mines === 0) {
-                                revealNeighbors(newRow, newCol); // Recursive reveal
-                            }
-                        }
-                    }
-                });
-            };
-
             // Reveal the current cell
             cell.cellState = "open";
             const adjacentMines = countAdjacentMines(rowIndex, colIndex);
             cell.adjacentMines = adjacentMines;
 
-            // If the cell has a mine, the game is lost
+            // If the cell has a mine, the game is lost and reveal all mines and if no adjacent mines, reveal neighbors
             if (cell.hasMine) {
                 state.gameStatus = "lost";
 
